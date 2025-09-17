@@ -61,6 +61,21 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "djangorestframework"
+version = "3.16.1"
+description = "Web APIs for Django, made easy."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "djangorestframework-3.16.1-py3-none-any.whl", hash = "sha256:33a59f47fb9c85ede792cbf88bde71893bcda0667bc573f784649521f1102cec"},
+    {file = "djangorestframework-3.16.1.tar.gz", hash = "sha256:166809528b1aced0a17dc66c24492af18049f2c9420dbd0be29422029cfc3ff7"},
+]
+
+[package.dependencies]
+django = ">=4.2"
+
+[[package]]
 name = "filelock"
 version = "3.19.1"
 description = "A platform independent file lock."
@@ -280,4 +295,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "48547f7d1718abb18f4b86abf4ce74be03ccd1d7dee185d1e0e3df1244210906"
+content-hash = "d23dd08db15ad22624f3b2a0841b49c2685897a7d277634c52db7cc016cb15bb"
