@@ -44,20 +44,45 @@ def delete_room(room_id: int) -> bool:
     return deleted > 0
 
 
-def create_booking(room_id: int, date_start: str, date_end: str) -> int:
-    """Создаёт бронь и возвращает её id.
-    - room_id: ID существующего номера (FK не проверяем вручную — БД/ORM валидирует)
-    - date_*: строки в формате YYYY-MM-DD
-    - НЕ проверяем занятость (по заданию это опционально)
+def create_booking(room_id: int, date_start: date, date_end: date) -> int:
     """
-    try:
-        ds = date.fromisoformat(date_start)
-        de = date.fromisoformat(date_end)
-    except ValueError as e:
-        raise ValueError("dates must be in YYYY-MM-DD format") from e
-    if de < ds:
+    Создаёт бронь и возвращает её id.
+    - room_id: существующий номер (проверяем наличия)
+    - date_*: объекты date (DRF сериализатор превратит строки в date)
+    """
+    if date_end < date_start:
         raise ValueError("date_end must be on or after date_start")
 
+    if not Room.objects.filter(pk=room_id).exists():
+        raise ValueError("room_not_found")
+
+    has_overlap = Booking.objects.filter(
+        room_id=room_id,
+        date_start__lt=date_end,
+        date_end__gt=date_start,
+    ).exists()
+    if has_overlap:
+        raise ValueError("room_unavailable")
+
     with transaction.atomic():
-        b = Booking.objects.create(room_id=room_id, date_start=ds, date_end=de)
+        b = Booking.objects.create(
+            room_id=room_id,
+            date_start=date_start,
+            date_end=date_end,
+        )
     return int(b.id)
+
+
+def list_bookings(room_id: int) -> list[dict]:
+    """Список броней номера, сортировка по date_start ASC."""
+    return list(
+        Booking.objects.filter(room_id=room_id)
+        .order_by("date_start")
+        .values("id", "date_start", "date_end")
+    )
+
+
+def delete_booking(booking_id: int) -> bool:
+    """Удаляет бронь. True — если что-то удалили."""
+    deleted, _ = Booking.objects.filter(pk=booking_id).delete()
+    return deleted > 0
