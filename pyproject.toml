@@ -20,6 +20,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.13.0"
 pre-commit = "^4.3.0"
+pytest = "^8.4.2"
+pytest-django = "^4.11.1"
 
 [tool.ruff]
 line-length = 100
