@@ -1,1 +1,11 @@
+# Local dev DB
 db.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Tooling / venv
+.venv/
+.ruff_cache/
+.pytest_cache/
