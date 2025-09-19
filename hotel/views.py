@@ -1,4 +1,9 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+)
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -23,14 +28,23 @@ from .services import (
     methods=["POST"],
     tags=["rooms"],
     summary="Create room",
-    description='Создаёт номер. Тело: {"description": str, "price": decimal}.'
-    'Ответ: {"room_id": int}.',
+    description="Создаёт номер.",
+    request=RoomCreateSerializer,
+    responses={
+        201: OpenApiResponse(OpenApiTypes.OBJECT, description='{"room_id": int}'),
+        400: OpenApiResponse(description="validation error"),
+    },
 )
 @extend_schema(
     methods=["GET"],
     tags=["rooms"],
     summary="List rooms",
-    description="Список номеров. Параметры: ?order_by=price|created_at, ?order=asc|desc.",
+    description="Список номеров.",
+    parameters=[
+        OpenApiParameter(name="order_by", required=False, type=str, enum=["price", "created_at"]),
+        OpenApiParameter(name="order", required=False, type=str, enum=["asc", "desc"]),
+    ],
+    responses={200: OpenApiResponse(OpenApiTypes.OBJECT, description="[... rooms ...]")},
 )
 @api_view(["POST", "GET"])
 def rooms_collection(request):
@@ -42,7 +56,6 @@ def rooms_collection(request):
         room_id = create_room(**ser.validated_data)
         return Response({"room_id": room_id}, status=status.HTTP_201_CREATED)
 
-    # GET
     order_by = request.query_params.get("order_by", "created_at")
     order = request.query_params.get("order", "asc")
     data = list_rooms(order_by=order_by, order=order)
@@ -53,7 +66,11 @@ def rooms_collection(request):
     methods=["DELETE"],
     tags=["rooms"],
     summary="Delete room",
-    description="Удаляет номер по ID. Ответ: {'status':'ok'} или 404.",
+    description="Удаляет номер по ID.",
+    responses={
+        200: OpenApiResponse(OpenApiTypes.OBJECT, description='{"status":"ok"}'),
+        404: OpenApiResponse(description="room not found"),
+    },
 )
 @api_view(["DELETE"])
 def rooms_item(request, room_id: int):
@@ -67,7 +84,13 @@ def rooms_item(request, room_id: int):
     methods=["POST"],
     tags=["bookings"],
     summary="Create booking",
-    description="Создаёт бронь. Ошибки: 404 (room not found), 400 (пересечение дат).",
+    description="Создаёт бронь.",
+    request=BookingCreateSerializer,
+    responses={
+        201: OpenApiResponse(OpenApiTypes.OBJECT, description='{"booking_id": int}'),
+        400: OpenApiResponse(description="validation error / room_unavailable"),
+        404: OpenApiResponse(description="room not found"),
+    },
 )
 @api_view(["POST"])
 def bookings_create(request):
@@ -95,7 +118,25 @@ def bookings_create(request):
     methods=["GET"],
     tags=["bookings"],
     summary="List bookings",
-    description="Список броней номера: ?room_id=<int>. Отсортировано по date_start ASC.",
+    description="Список броней номера. Отсортировано по date_start.",
+    parameters=[
+        OpenApiParameter(
+            name="room_id",
+            type=int,  # или OpenApiTypes.INT
+            location=OpenApiParameter.QUERY,
+            required=True,
+            description="ID номера",
+        ),
+    ],
+    responses={
+        200: OpenApiResponse(
+            OpenApiTypes.OBJECT,
+            description=(
+                '[{"id": int, "date_start": "YYYY-MM-DD", "date_end": "YYYY-MM-DD"}, ...]'
+            ),
+        ),
+        400: OpenApiResponse(description="validation error"),
+    },
 )
 @api_view(["GET"])
 def bookings_list(request):
@@ -111,7 +152,13 @@ def bookings_list(request):
     methods=["POST"],
     tags=["bookings"],
     summary="Delete booking",
-    description="Удаляет бронь по booking_id. Ответ: {'status':'ok'} или 404.",
+    description="Удаляет бронь по booking_id.",
+    request=BookingDeleteSerializer,
+    responses={
+        200: OpenApiResponse(OpenApiTypes.OBJECT, description='{"status":"ok"}'),
+        404: OpenApiResponse(description="booking not found"),
+        400: OpenApiResponse(description="validation error"),
+    },
 )
 @api_view(["POST"])
 def bookings_delete(request):
