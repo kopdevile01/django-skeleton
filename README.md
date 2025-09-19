@@ -14,3 +14,8 @@
 ```bash
 docker compose up -d --build
 # сервер поднимется на http://127.0.0.1:8000
+``` 
+## API docs
+- OpenAPI schema: `GET /schema/`  (JSON: `/schema/?format=json`)
+- Swagger UI: `GET /docs/`
+- Redoc: `GET /redoc/`
