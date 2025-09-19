@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "hotel",
 ]
 
@@ -134,3 +136,14 @@ if os.getenv("DB_HOST"):
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Hotel & Bookings API",
+    "DESCRIPTION": "Мини-сервис для управления номерами отеля и бронированиями.",
+    "VERSION": "1.0.0",
+    "SERVERS": [{"url": "http://127.0.0.1:8000"}],
+}
